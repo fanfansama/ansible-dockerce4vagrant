@@ -2,16 +2,16 @@
 # tasks file for ansible-docker4vagrant
 
 - name: Install aptitude using apt
-  apt: 
-    name: aptitude 
-    state: latest 
-    update_cache: yes 
+  apt:
+    name: aptitude
+    state: latest
+    update_cache: yes
     force_apt_get: yes
 
 - name: Install required system packages
-  apt: 
-    name: {{ item }} 
-    state: latest 
+  apt:
+    name: '{{ item }}'
+    state: latest
     update_cache: yes
   loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
 
@@ -26,9 +26,9 @@
     state: present
 
 - name: Update apt and install docker-ce
-  apt: 
-    update_cache: yes 
-    name: docker-ce 
+  apt:
+    update_cache: yes
+    name: docker-ce
     state: latest
 
 - name: Install Docker Module for Python
@@ -54,8 +54,8 @@
     src: 'daemon.json'
     dest: '/etc/docker/daemon.json'
 
-# Without adding the unprivileged 
-# user to the docker group we can't 
+# Without adding the unprivileged
+# user to the docker group we can't
 # make use of the socket that is activated
 # by systemd. Here we take a list of users that
 # we want to make part of the `docker` group and
