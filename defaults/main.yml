@@ -1,0 +1,12 @@
+---
+# defaults file for ansible-docker4vagrant
+
+# List of users that we want to add to the
+# `docker` group. As mentioned, by adding them to
+# the `docker` group they can access the Unix socket
+# that Docker places at `/var/run/docker.sock` (by default)
+# which the docker CLI uses to communicate with
+# the docker daemon.
+docker_group_members:
+  - 'ubuntu'
+  - 'vagrant'

@@ -1,0 +1,69 @@
+---
+# tasks file for ansible-docker4vagrant
+
+- name: Install aptitude using apt
+  apt: 
+    name: aptitude 
+    state: latest 
+    update_cache: yes 
+    force_apt_get: yes
+
+- name: Install required system packages
+  apt: 
+    name: {{ item }} 
+    state: latest 
+    update_cache: yes
+  loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu bionic stable
+    state: present
+
+- name: Update apt and install docker-ce
+  apt: 
+    update_cache: yes 
+    name: docker-ce 
+    state: latest
+
+- name: Install Docker Module for Python
+  pip:
+    name: docker
+
+# Once Docker has finished the installation (which involves
+# setting a systemd service) we have the option to either
+# enable that service or not. By enabling it, systemd hooks
+# the docker unit into specific places such that whenever the
+# machine boots we have this service started.
+- name: 'enable docker systemd service'
+  service:
+    name: 'docker'
+    state: 'started'
+    enabled: 'yes'
+
+# As we can configure the docker daemon via the configuration
+# file `/etc/docker/daemon.json` here we take the opportunity
+# of placing one of our own at the relevant destination.
+- name: 'prepare default daemon configuration'
+  copy:
+    src: 'daemon.json'
+    dest: '/etc/docker/daemon.json'
+
+# Without adding the unprivileged 
+# user to the docker group we can't 
+# make use of the socket that is activated
+# by systemd. Here we take a list of users that
+# we want to make part of the `docker` group and
+# do it.
+- name: 'add users to docker group'
+  user:
+    name: '{{ item }}'
+    groups: 'docker'
+    append: 'yes'
+  with_items: '{{ docker_group_members }}'
+  when: 'docker_group_members is defined'
